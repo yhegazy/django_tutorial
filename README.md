@@ -6,7 +6,7 @@ This is my take on how to build a simple django website. I am going to try to be
 
 Table of Contents:
 
-01. Building a Skeleton Project
+01. <a href="skeleton.html">Building a Skeleton Project</a>
 02. Models
 03. Creating an Admin Site
 04. Creating a Home Page
