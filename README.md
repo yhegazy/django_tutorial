@@ -2,12 +2,12 @@
 
 بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيم
 
-This is my take on how to build a simple django website. I am going to try to be as basic as possible regarding code in hopes in making it easier to understand. 
+I learned Django through (https://developer.mozilla.org/en-US/docs/Learn/Server-side/Django). This is my understanding on how to build a simple django website. I am going to try to be as basic as possible regarding code in hopes in making it easier to understand. 
 
 Table of Contents:
 
 01. <a href="#skeleton">Building a Skeleton Project</a>
-02. Models
+02. <a href="#models">Models</a>
 03. Creating an Admin Site
 04. Creating a Home Page
 05. Creating Generic Views
@@ -16,9 +16,10 @@ Table of Contents:
 08. Working with Forms
 09. Creating Flatpages
 
-
+<br></br><br></br>
 
 <div id="skeleton">
+  <h2>Building a Skeleton Project</h2>
   <h5>Side Note::</h5>
   <p>In this lesson, we're going to learn how to build a skeleton website for any project. This can be expanded out to other types of platforms with the technology and coding used in this lesson. The documentation does not include how to configure the web development server [webdev]. I may write this some other time.</p>
   <p>This is written in mind for Linux. For windows, replace <b>python3</b> with <b>python</b></p>
@@ -179,4 +180,28 @@ To run the devweb:
   <code> python3 manage.py runserver</code>
   
 This concludes Building Skeleton Project
+</div>
+
+<br></br><br></br>
+<div id="models">
+  <h2>Models</h2> 
+  <p>Django web application access and manage data through Python object referred to as models. Models define the structure of stored data.</p>
+  <h5>Designing the Projname models</h5>
+  <p> It is best to have separate models for every "object". An object is a group of related information. Books, Book Instances, and Authors are examples of what objects can be.</p>
+  
+  <p>You might want to use models to represent a options in a drop down rather than hard coding the selection choices on the web page itself. Once model and fields have been decided, you may awnt to think about relationships next. There are many types of relationships Django has to offer such as OneToOneField (one to one), ForeignKey (one to many), and ManyToManyField (many to many).</p>
+  
+<h5>Model primer</H5>
+<p>Models are usually defined in an application's models.py file. They are implemented as subclasses of django.db.models.Model and can include fields, methods, and metadata.</p>
+
+<h6>Fields</h6>
+<p>A model can have arbitrary number of fields of any type - each one represents a column of data that we want to store in one of our db tables. Each db record (row) will consist of one of each field value. Example:</p>
+```python
+    my_field_name = models.CharField(max_length=20, help_text="Enter Field Documentation.")
+```
+
+<p>The example above has a single field called <b>my_field_name</b> of type <b>models.CharField</b>. This means the field will contain strings of alphanumeric characters. The field types are assigned using specific classes, which determine the type of record that is used to share the data in the db, along with validation criteria to be used when values are received from an HTML Form (valid value). The field type can also take arguments that further specify how the field is stored or can be used.</p>
+
+...
+
 </div>
