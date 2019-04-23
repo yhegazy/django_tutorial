@@ -192,16 +192,19 @@ This concludes Building Skeleton Project
   <p>You might want to use models to represent a options in a drop down rather than hard coding the selection choices on the web page itself. Once model and fields have been decided, you may awnt to think about relationships next. There are many types of relationships Django has to offer such as OneToOneField (one to one), ForeignKey (one to many), and ManyToManyField (many to many).</p>
   
 <h5>Model primer</H5>
-<p>Models are usually defined in an application's models.py file. They are implemented as subclasses of django.db.models.Model and can include fields, methods, and metadata.</p>
+<p>Models are usually defined in an application's <b>models.py</b> file. They are implemented as subclasses of <code>django.db.models.Model</code> and can include fields, methods, and metadata.</p>
 
 <h6>Fields</h6>
 <p>A model can have arbitrary number of fields of any type - each one represents a column of data that we want to store in one of our db tables. Each db record (row) will consist of one of each field value. Example:</p>
-```python
-    my_field_name = models.CharField(max_length=20, help_text="Enter Field Documentation.")
-```
 
-<p>The example above has a single field called <b>my_field_name</b> of type <b>models.CharField</b>. This means the field will contain strings of alphanumeric characters. The field types are assigned using specific classes, which determine the type of record that is used to share the data in the db, along with validation criteria to be used when values are received from an HTML Form (valid value). The field type can also take arguments that further specify how the field is stored or can be used.</p>
+    my_field_name = models.CharField(max_length=20, help_text="Enter Field Documentation.")
+    
+
+<p>The example above has a single field called <b>my_field_name</b> of type <code>models.CharField</code>. This means the field will contain strings of alphanumeric characters.</p>
+  
+<p>Field types are assigned using specific classes, which determine the type of record that is used to share the data in the db, along with validation criteria to be used when values are received from an HTML Form (valid value). The field type can also take arguments that further specify how the field is stored or can be used.</p>
 
 ...
+
 
 </div>
