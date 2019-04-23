@@ -204,7 +204,65 @@ This concludes Building Skeleton Project
   
 <p>Field types are assigned using specific classes, which determine the type of record that is used to share the data in the db, along with validation criteria to be used when values are received from an HTML Form (valid value). The field type can also take arguments that further specify how the field is stored or can be used.</p>
 
+<p>The order that fields are declared will affect their default order if a model is rendered in a form and the admin site; though this may be overridden.</p>
+
+<h5>Common Field Arguments</h5>
+
+* help_text: Provides a text label for HTML forms
+* verbose_name: A human-readable name for the field used in field labels. If not specified, Django will assign one.
+* default: The default value for the field. This can be a value or a callable object, in which case, the object will be called every time a new record is created.
+* null: If True, Django will store blank values as NULL in db. Default is False
+* blank: If True, the field is allowed to be blank in the forms. Default is False, which means Django's form validation will force you to enter a value. This is often used with null = true
+* choices: A group of choices for this field. Think select boxes.
+* primary key: If True, sets the current field as the primary key for the model. If no field is specified, Django will add a field for this purpose.
+
+<a href="https://docs.djangoproject.com/en/1.10/ref/models/fields/#field-options" target="_blank">Full Field Options List</a>
+
+<h5> Common Field Types</h5>
+
+* CharField: used to define short-to-mid sized fixed length strings. You must specify max_length of the data to be stored. 
+* TextField: used for large arbitrary-length strings. You may specify a max_length for the field, but this is used only when the field is displayed in a form (not enforced by db).
+* IntegerField: a field for storing integer (whole number) values and for validating entered values as integers in forms.
+- DateField and DateTimeField: for storing/representing dates and date/time information. 
+  - auto_new = True: Sets the field to the current DTime every time the model is saved.
+  - auto_now_add: Only set the date when the model is first created.
+  - default: set default date that can be overridden by the user
+* EmailField: store and validate email addresses
+* FileField and ImageField: upload files and images respectively.
+* AutoField: special type of IntegerField that auto increment primary key of this type is automatically added to the model
+* ForeignKey: used to specify one-to-many relationship. The "one" sided of the relationship is the model that contains the key.
+* ManyToManyField: many-to-may relationship. Example - a book can have several genres and each genre can contain several books.
+
+<a href="https://docs.djangoproject.com/en/1.10/ref/models/fields/#field-types" target="_blank">Full Field Types List</a>
+
+<h5>MetaData</h5>
+<p>Metadatas can be declared by the class Meta.</p>
+
+```python
+    class Meta:
+        ordering = ["-my_field_name"]
+```
+
+<p>One of the most useful features of the metadata is control the default ordering to the ordering attribute. The ordering will depend on the type of field.</p>
+
+<p>Prefixing the minus sign (-) to reverse the sorting order.</p>
+
+```python
+ordering = ["Title", "-pubdate"]
+```
+
+<p>In this example, the books would be sorted alphabetically from A - Z, then by publication date inside each title, from newest to oldest.</p>
+<p><code>verbose_name</code> is a common attribute and is written: <code>verbose_name = "BetterName" </code>. This is both for its plural and singular form.</p>
+
+<a href="https://docs.djangoproject.com/en/1.10/ref/models/options/" target="_blank">Full Model Options List</a>
+
+
 ...
+
+
+
+
+
 
 
 </div>
