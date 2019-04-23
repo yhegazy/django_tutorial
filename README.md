@@ -71,7 +71,7 @@ Table of Contents:
 * admin site configuration in admin.py 
 * application registration in apps.py 
 
-<h2>Registering the appname application<h2>
+<h2>Registering the appname application</h2>
 <p>Applications are registered by adding them to the INSTALLED_APPS list in the project settings. Edit: <b>projname/projname/settings.py</b> and find the definition for the <code>INSTALLED_APPS</code> list and add a new line @ the end of the list:</p>
 
 ```python
