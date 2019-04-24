@@ -256,7 +256,94 @@ ordering = ["Title", "-pubdate"]
 
 <a href="https://docs.djangoproject.com/en/1.10/ref/models/options/" target="_blank">Full Model Options List</a>
 
+<h5>Methods</h5>
+<p>A model can also have methods.</p>
 
+<p>Minimally, in every model you should define the standard Python class method <code>__str__()</code> to return a human-readable string for each object. The string represent individual records in the administration site. This will return a title or name field from the model.</p>
+
+```python
+    def __str__(self):
+        return self.field_name
+```
+
+<p>Another common method to include is <code>get_absolute_url()</code>. This returns a URL for displaying individual model records on the website. A typical pattern shown:
+
+```python
+        def get_absolute_url(self):
+            """
+            Returns the URL to access a particular instance of the model
+            """
+            return reverse("model-detail-view", args=[str(self.id)])
+```
+
+<h5>Model Management</h5>
+<h6>Creating & Modifying Records</h6>
+<p>To create a record, you can define an instance of the model then call <code>save()</code>
+
+```python
+    #Create a new record using the model's constructor
+    a_record = MyModelName(my_field_name="Instance #1")
+
+    #Save the object into the database
+    a_record.save()
+
+```
+
+<p>You can access the fields in this new record using the dot syntax (like JavaScript) and change values. Call <code>save()</code> to store the modifications.</p>
+
+```python
+    #Access model field values using Python attributes
+    print(a_record.id) # Should return 1 for 1st record
+    print(a_record.my_field_name) # Should print "Instance #1"
+
+    #Change record by modifying the field, then call save()
+    a_record.my_field_name = "New Instance Name"
+    a_record.save()
+
+```
+
+<h6>Searching for Records</h6>
+<p>To explain clearly, the Book object will be used as a model. You can search for records that match a certain criteria using the model's object attribute. You will need to use QuerySet (<code>objects.all()</code>) to get all records for a model. The QuerySet as an iterable object.</p>
+
+```python
+    all_books = Book.objects.all()
+```
+
+<p>Django's <code>filter()</code> method allows us to filter the returned QuerySet to match a specified text and numeric field against a particular criteria. In this example, it is searching for the word <b>"wild"</b> in the title as well as counts them.
+  
+```python
+    wild_books = Books.objects.filter(title__contains="wild")
+    number_wild_books = Books.objects.filter(title__contains="wild").count()
+```
+
+<p>The field to match and the type of match are defined in the filter parameter name using the format <code>field_name__match_type</code>.</p>
+
+<p>Other types of matching:</p>
+
+- icontains: case insensitive
+- iexact: case-insensitive exact match
+- exact: case-sensitive exact match
+	
+<a href="https://docs.djangoproject.com/en/1.10/ref/models/querysets/#field-lookups" target="_blank"> Full Field Lookup List</a>
+
+
+<p>Sometimes, you'll need to filter on a field that defines a ForeignKey relationship to another model. In this case, you can <i>"index"</i> to fields within the related model with additional double underscores. In this example, a specific genre pattern is used as a filter for a book</p>
+
+```python
+    books_containing_genre = Books.objects.filter(genre__name__icontains = 'fiction')
+    #Will match on Fiction, Science fiction, non-fiction, etc.
+```
+
+<h5>Defining the Projname Model</h5>
+<p>In this section, we'll start defining the models for the projname. Open <b>/projname/appname/models.py</b>. 
+ 
+  ```python
+    from django.db import models
+    # Create your models here
+```
+
+<p>This model (below) can be served as a template for any appname model. </p>
+ 
 ...
 
 
