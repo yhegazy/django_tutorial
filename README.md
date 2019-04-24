@@ -342,7 +342,38 @@ ordering = ["Title", "-pubdate"]
     # Create your models here
 ```
 
-<p>This model (below) can be served as a template for any appname model. </p>
+<p>This model (below) can be served as a template for any <b>appname</b> model. Notice the captalization of <code>ModelName</code> in various parts of the code. This is important! </p>
+
+```python
+
+from django.db import models
+from django.urls import reverse # Used to generate URLs by reversing the URL pattern
+from PIL import Image
+
+# Create your models here.
+class ModelName(models.Model):
+    """
+    Model representing the ModelName.  
+    """
+    variableX = models.CharField(max_length=100, help_text="Enter some radom text here.", null=True, blank=True)
+    dareVariable = models.DateTimeField(auto_now_add=True, blank=True)
+    
+    #FileField used because a home page can have imagery
+    images = models.FileField(null=True, blank=True)
+    
+    def __str__(self):
+        """
+        String for representing the Model object (in Admin site)
+        """
+        return self.title
+
+    def get_absolute_url(self):
+        """
+         Returns the url to access a particular item.
+        """
+        return reverse('modelname-list', args=[str(self.id)])
+
+```
  
 ...
 
