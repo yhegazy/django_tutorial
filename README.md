@@ -8,7 +8,7 @@ Table of Contents:
 
 01. <a href="#skeleton">Building a Skeleton Project</a>
 02. <a href="#models">Models</a>
-03. Creating an Admin Site
+03. <a href="#admin">Creating an Admin Site</a>
 04. Creating a Home Page
 05. Creating Generic Views
 06. Session Framework
@@ -352,13 +352,13 @@ from PIL import Image
 
 # Create your models here.
 
-class Modelname(models.Model):
+class ModelClassName(models.Model):
     """
-    Model representing the Modelname.  
+    Model representing the ModelClassName.  
     """
     foo = models.CharField(max_length=100, help_text="Enter some radom text here.", null=True, blank=True)
-    bar = models.ManyToManyField(ModelnameX, help_text="ModelnameX is a another model listed in the models.py file")
-    foobar = models.ForeignKey('ModelnameX2', on_delete=models.SET_NULL, null=True)
+    bar = models.ManyToManyField(ModelClassName1, help_text="ModelClassName1 is a another model listed in the models.py file")
+    foobar = models.ForeignKey('ModelClassName2', on_delete=models.SET_NULL, null=True)
     dateVariable = models.DateTimeField(auto_now_add=True, blank=True)
         
     #FileField used because a home page can have imagery
@@ -411,6 +411,68 @@ class Modelname(models.Model):
 <code> python3 manage.py runserver</code>
 
 <p>This concludes Using Models</p>
+</div>
+<div id="admin">
+	<h2>Creating an Admin Site</h2>
+	<h5>Overview</h5>
+	<p>The Django admin application can use your models to automatically build a site area that you can use to create, view, update and delete records. It is useful for managing data in production, depending on the type of website. Django recommends it only for internal data management (just used by admins). All the configuration required to include the admin application in your website was done automatically at the creations of the <a href="#skeleton"> Skeleton Project</a>. As a result, all you must do to add your models to the admin application is to register them</p>
+
+<h5>Registering models</h5>
+<p>Open <b>/projname/appname/admin.py</b>. You will see a simple template</p>
+
+```python
+    from django.contrib import admin
+
+    #Register your models here.
+```
+
+<p>To register the models, copy the text at the bottom of the file. The code imports the models and then calls <code>admin.site.register()</code> to register each of them. This is the simplest way of registering the model(s) with the site.</p>
+
+```python
+    from django.contrib import admin
+    from .models import ModelClassName1, ModelClassName2, ModelClassNameX
+
+    #Register your models here.
+    admin.site.register(ModelClassName1)
+    admin.site.register(ModelClassName2)
+    admin.site.register(ModelClassNameX)
+```
+<h5>Creating a superuser</h5>
+<p>In order to log into the admin site, we need a user account. In order to view and create records, we need this user to have permissions to manage all our objects.</p>
+
+```
+    python3 manage.py createsuperuser
+```
+
+<p>This command creates full access to the site and all needed permissions using <b>manage.py</b>. You will be prompted to enter a username, email address and a strong password.
+   
+```   
+    python3 manage.py runserver
+```
+
+<h5>Logging in and using the site</h5>
+<p>To login to the site, open <b>http://127.0.0.1:8000/admin</b> and enter your newly created superuser credentials. This part of the site displays all the models, grouped by installed application. You can click on a model name to go to a screen that lists all its associated records. They can be further clicked to edit them. Also, you can directly click to <b>Add</b> link next to each model to start creating a record of that type.</p>
+
+<p>Click on the <b>Add</b> link to the right of the <b>ModelClassName</b> to create a new item. Enter values for the fields. When done, press <b>SAVE</b>, </b>Save and add another</b>, or <b>Save and continue editing</b> to save the record.</p>
+
+<h5>Advanced configuration</h5>
+<p>Django does a good job of creating a basic admin site using the information from the registered models:</p>
+
+1. Each model has a list of individual records, identified by the string created with the model's <code>__str__()</code> method, and linked to detail views/forms for editing.
+2. The model detail record forms for editing and adding records contain all the fields in the model, laid out vertically in their declaration order.
+
+<p>You can further customize the interface to make it even easier to use. </p>
+
+- List Views:
+1. add additional fields/information displayed for each record.
+2. add filters to select which records are listed.
+3. add additional options to the actions menu in list views and choose where this menu is displayed on the form.
+
+- Detail views:
+1. Choose which fields to display (or exclude), along with their order, grouping whether they are editable, the widget used, orientation, etc.
+2. Add related fields to a record allow inline editing
+
+<p>You can find a complete reference of all the admin site in The Django Admin site.</p>
 
 ...
 
