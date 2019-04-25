@@ -472,7 +472,86 @@ class ModelClassName(models.Model):
 1. Choose which fields to display (or exclude), along with their order, grouping whether they are editable, the widget used, orientation, etc.
 2. Add related fields to a record allow inline editing
 
-<p>You can find a complete reference of all the admin site in The Django Admin site.</p>
+<p>You can find a complete reference of all the admin site in The <a href="https://docs.djangoproject.com/en/1.01/ref/contrib/admin/"> Django Admin site</a>.</p>
+
+<h6>Register a ModelAdmin class</h6>
+<p>The <code>ModelAdmin</code> class allows you to change how a model is displayed in the admin site. Open <code>/projname/appname/admin.py</code> and comment out the original registration for the <code>ModelClassName</code> class:</p>
+
+```python
+    #admin.site.register(ModelClassName)
+```
+<p>And add a new <code>ModelClassName</code> and registration as shown below:</p>
+
+```python
+    # Define the admin class
+    class ModelClassNameAdmin(admin.ModelAdmin):
+        pass
+
+    # Register the admin class with the associated model
+    admin.site.register(ModelClassName, ModelClassNameAdmin)
+
+```
+
+<p>Repeat for the other <code>ModelCassName</code> classes. You can register the model with a decorator (as shown below) instead of <code>admin.site.register()</code>:</p>
+
+```python
+    @admin.register(ModelClassName)
+    class ModelClassNameAdmin(admin.ModelAdmin):
+        pass
+```
+
+<h6>Optional - Configure list views</h6>
+<p>To create column headers, replace the pass as shown below. Review any other classes that may require this update:</p>
+
+```python
+    @admin.register(ModelClassName)
+    class ModelClassNameAdmin(admin.ModelAdmin):
+        list_display = ('foo', 'bar', 'foobar')
+```
+
+<p>Finally, fields are displayed vertically by default, but will display horizontally if you further group them in a tuple, as so:</p>
+
+```python
+    @admin.register(ModelClassName)
+    class ModelClassNameAdmin(admin.ModelAdmin):
+        list_display = ('foo', 'bar', 'foobar')
+        fields = [('foo', 'bar'), 'foobar']
+
+```
+
+<p>You can add "sections" to group related model information within the detail form, using the fieldset attributes. For example:</p>
+
+```python
+    @admin.register(ModelClassName)
+    class ModelClassNameAdmin(admin.ModelAdmin):
+        list_display = ('foo', 'bar', 'foobar')
+        list_filter = ('ascending', 'descending')
+    
+        fieldsets = (
+            (None, {
+                'fields': ('test1','test2', 'id')
+            }),
+            ('Availability', {
+                'fields': ('ascending', 'descending')
+            }),
+        )
+```
+
+<p>To declare inline editing of associated records:</p>
+
+```python
+    class ModelClassNameInline(admin.TabularInline):
+        model = ModelClassName
+
+    @admin.register(ModelClassName)
+    class ModelClassNameAdmin(admin.ModelAdmin):
+        list_display = ('foo', 'bar', 'foobar_tag')
+        inlines = [ModelClassNameInline]
+```
+
+<p>Restart the application to view your changes.<br>
+This concludes Creating an Admin site</p>
+
 
 ...
 
