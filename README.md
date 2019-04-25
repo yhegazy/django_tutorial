@@ -342,7 +342,7 @@ ordering = ["Title", "-pubdate"]
     # Create your models here
 ```
 
-<p>This model (below) can be served as a template for any <b>appname</b> model. Notice the captalization of <code>ModelName</code> in various parts of the code. This is important! </p>
+<p>This model (below) can be served as a template for any <b>appname</b> model. Notice the captalization of <code>Modelname</code> in various parts of the code. This is important! </p>
 
 ```python
 
@@ -351,13 +351,16 @@ from django.urls import reverse # Used to generate URLs by reversing the URL pat
 from PIL import Image
 
 # Create your models here.
-class ModelName(models.Model):
+
+class Modelname(models.Model):
     """
-    Model representing the ModelName.  
+    Model representing the Modelname.  
     """
-    variableX = models.CharField(max_length=100, help_text="Enter some radom text here.", null=True, blank=True)
-    dareVariable = models.DateTimeField(auto_now_add=True, blank=True)
-    
+    foo = models.CharField(max_length=100, help_text="Enter some radom text here.", null=True, blank=True)
+    bar = models.ManyToManyField(ModelnameX, help_text="ModelnameX is a another model listed in the models.py file")
+    foobar = models.ForeignKey('ModelnameX2', on_delete=models.SET_NULL, null=True)
+    dateVariable = models.DateTimeField(auto_now_add=True, blank=True)
+        
     #FileField used because a home page can have imagery
     images = models.FileField(null=True, blank=True)
     
@@ -374,7 +377,41 @@ class ModelName(models.Model):
         return reverse('modelname-list', args=[str(self.id)])
 
 ```
- 
+<p>The variable <code>bar</code> has a ManyToManyField relationship. A good way of wrapping your head around it is to think like this - A book can have multiple genres and a genre can have multiple books. </p>
+
+<p>The variable <code>foobar</code> has a ForeignKey relationship. ForeignKey relationship can be thought as each book has 1 author, but any author may have many books. Also, take notice this is wrapped with single quotes (''). </p>
+
+<p>Here is an example on how to build a drop down list:</p>
+
+```python
+ #Build out the drop down here:
+        LOAN_STATUS = (
+            ('m', 'Maintenance'),
+            ('o', 'On loan'),
+            ('a', 'Available'),
+            ('r', 'Reserved'),
+        )
+                                                #assign DD here
+        status = models.CharField(max_length=1, choices=LOAN_STATUS, blank=True, default='m', help_text='Book availability')
+```
+
+<p>Lastly, things to make mention: </p>
+
+1. <code>on_delete=models.SET_NULL</code> | set the value of the author to NULL if the associated author record is deleted.
+2. <code>UUIDField</code> | used for the id field to set it as the primary_key for this model. This type of field allocates a globally unique value for each instance (one for every book you can find in the library).
+3. <code>DateField</code> | used for the due_back date. This value can be blank or null The model metadata Class Meta uses this field to order records when they are returned in a query.
+4. <code>status</code> | a CharField that defines a choice/selection list.
+
+<p> The model defines <code>__str__()</code>, using the book's title field to represent a Book record. The final method, <code>get_absolute_url()</code> returns a URL that can be used to access a detail record for this model.</p>
+
+<code>python3 manage.py makemigrations</code><br>
+<code>python3 manage.py migrate</code>
+
+<p>To run the devweb:</p>
+<code> python3 manage.py runserver</code>
+
+<p>This concludes Using Models</p>
+
 ...
 
 
