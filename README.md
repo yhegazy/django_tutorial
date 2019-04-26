@@ -282,7 +282,7 @@ ordering = ["Title", "-pubdate"]
 
 ```python
     #Create a new record using the model's constructor
-    a_record = MyModelName(my_field_name="Instance #1")
+    a_record = ModelClassName(my_field_name="Instance #1")
 
     #Save the object into the database
     a_record.save()
@@ -342,7 +342,7 @@ ordering = ["Title", "-pubdate"]
     # Create your models here
 ```
 
-<p>This model (below) can be served as a template for any <b>appname</b> model. Notice the captalization of <code>Modelname</code> in various parts of the code. This is important! </p>
+<p>This model (below) can be served as a template for any <b>appname</b> model. Notice the captalization of <code>ModelClassName</code> in various parts of the code. This is important! </p>
 
 ```python
 
