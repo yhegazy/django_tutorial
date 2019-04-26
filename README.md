@@ -374,7 +374,7 @@ class ModelClassName(models.Model):
         """
          Returns the url to access a particular item.
         """
-        return reverse('modelname-list', args=[str(self.id)])
+        return reverse('modelclassname-list', args=[str(self.id)])
 
 ```
 <p>The variable <code>bar</code> has a ManyToManyField relationship. A good way of wrapping your head around it is to think like this - A book can have multiple genres and a genre can have multiple books. </p>
