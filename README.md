@@ -9,7 +9,7 @@ Table of Contents:
 01. <a href="#skeleton">Building a Skeleton Project</a>
 02. <a href="#models">Models</a>
 03. <a href="#admin">Creating an Admin Site</a>
-04. Creating a Home Page
+04. <a href="#homepage">Creating a Home Page</a>
 05. Creating Generic Views
 06. Session Framework
 07. User Authentication and Permissions
@@ -551,7 +551,85 @@ class ModelClassName(models.Model):
 
 <p>Restart the application to view your changes.<br>
 This concludes Creating an Admin site</p>
+</div>
 
+<div id="homepage">
+	<h2>Creating a Home Page</h2>
+	<p>We are now ready to add the code to display our first full page - a home page for the <b>projname</b> website. Also, we'll gain practical experience in writing basic URL maps and views, getting records from the db, and using templates.</p>
+	
+<h5>Overview</h5>
+<p>Now we have defined our models and created some initial records to work with, it's time to write the code to present that information to the users. First, we need to determine what information is needed to be able to display in our pages, then define the appropriate URLs for returning those resources. Lastly, we need to create the url mapper, views, and templates to display those pages.</p>
+
+<p> The diagram below is a reminder of the main flow of data and items that needs to be implemented when handling the HTTP rquest/response. We've already created the model, the main item to focus on next are: </p>
+
+- URL maps to forward the supported URLs to the appropriate view functions
+- View functions to get the requested data from the models, create an HTML page displaying the data, and return it to the user to view in the browser
+- Templates used by the views to render the data
+
+<br><img src="figure1.png"></br>
+
+<h5>URL mapping</h5>
+<p>In the <a href="#skeleton">Building a Skeleton Project</a>, we created a basic <b>/projname/appname/urls.py</b> file for our <b>appname</b> application. The <b>appname</b> application URLs were included into the project with a mapping of <b>appname/</b>. So, the URLs that get to this mapper must start with <b>appname/</b>. </p>
+
+<p>Edit <b>/projname/appname/urls.py</b> by copying and pasting the code below:</p>
+
+```python
+	urlpatterns = [
+		url(r'^$', 'views.index', name='index'),
+	]
+```
+
+<h6>Side Note::</h6>
+<p>If you’re coding in Visual Studio Code, it will complain about <code>views.index</code>. Ignore it until you’ve completed the View(function-based) below.</p>
+
+<p>This <code>url()</code> function defines a URL pattern <code>r'^$'</code> (regular expression - we'll discuss about RegEx in a later lesson). A view function will be called if the pattern detects <code>views.index</code> (a function named <code>index()</code> in <b>/projname/appname/views.py</b>). It specifies a name parameter, which uniquely identifies this particular URL mapping. You can use this name to "reverse" the mapper (to dynamically create a URL pointing to the resources the mapper is designed to handle). For example, we can link our home page by creating the following link in our template:</p>
+
+```django
+	<a href="{% url 'index' %}">Home</a>
+```
+
+<h6>Side Note::</h6>
+<p> We can hard code the above link like this: </p>
+
+```html
+	<a href="/appname/"<Home</a>
+```
+<p>But then if we changed the pattern for our home page (e.g to /appname/index), the template would no longer link correctly. Using a reversed url mapping is much more flexible and robust.</p>
+
+<h5>View (function-based)</h5>
+<p>A view function is a function that processes an HTTP request, fetches data from the db (as needed), and generates an HTML page by rendering this data using an HTML template. It then returns the HTML in an HTTP response to be shown to the user. </p>
+
+<p>Open <b>projname/appname/views.py</b>. Note, the file already imports the <code>render()</code> shortcut function. This generates HTML files using a template and data. </p>
+
+```python
+	from django.shortcuts import render
+	#create your views here. 
+```
+
+<p>Copy and paste the following code. The first line imports the model classes that we will use to access data in all our views. </p>
+
+<a href="https://developer.mozilla.org/en-US/docs/Learn/Server-side/Django/Home_page"> MDN - Creating a Home Page</a>
+
+```python
+	from django.shortcuts import render
+	from .models import ModelClassName1, ModelClassName2
+	
+	#create your views here.
+	def index(request):
+	"""
+	View function for home page of site.
+	"""
+	
+	# Generate counts of some of the main objects
+	gen_count = ModelClassName.objects.all().count()
+	# Render the HTML template index.html with the data in the
+	context variable
+	return render(
+		request,
+		'index.html',
+		context={'gen_count':gen_count},
+	)
+```
 
 ...
 
