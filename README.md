@@ -630,8 +630,122 @@ This concludes Creating an Admin site</p>
 		context={'gen_count':gen_count},
 	)
 ```
+<h5>Template</h5>
+<p>A template in Django are like partials in AngularJS. They define the structure or layout of a file with placeholders used to represent the actual content. Django will automatically look for templates in a directory named <i>"templates"</i> in your application. As of now, accessing <code>127.0.0.1:8000</code> raises an error stating the file cannot be found. Templates are located in <b>/projname/appname/templates</b>.
+
+<h6>Extending templates</h6>
+<p>The index template requires a standard HTML markup for the head and body, along with sections for navigation (to other pages we haven't yet created) and for displaying some introductory text and our data. Rather than forcing to duplicate this <i>"boilerplate"</i> in every page, Django templating language allows you declare a base template and then extend it by replacing just the bits that are different for each specific page.</p>
+<p>When we want to define a template for a particular view, first, specify the base template with the extendscontent block. The final HTML produced would have all the HTML and structure defined in the base template.</p>
+
+```django
+	{% extends "base_generic.html" %}
+	{% block content %}
+	<h1>Local Library Home</h1>
+	<p>Hello <em>World!</em>. This is a very basic Django website developed as a tutorial.</p>
+	{% endblock %}
+```
+
+<h6>The projname base template</h6>
+<p>The base template for the projname website is listed below. As you see, this contains some HTML and defined blocks for title, sidebar, and content. There is a default title and sidebar with links to lists of all items. To get started, create a new file <b>/projname/appname/templates/base_generic.html</b> and give it the following contents:</p>
+
+```django
+	<!DOCTYPE html>
+	<html lang="en">
+	<head>
+		{% block title %}<title>PROJNAME TITLE</title>{% endblock %}
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+		<!-- Add additional CSS in static file -->
+		{% load static %}
+		<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+	</head>
+	<body>
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-sm-2">
+				{% block sidebar %}
+					<ul class="sidebar-nav">
+						<li><a href="{% url 'index' %}">Home</a></li>
+						<li><a href="">All MODELCLASSNAME1</a></li>
+						<li><a href="">All MODELCLASSNAME2</a></li>
+					</ul>
+				{% endblock %}
+				</div>
+				<div class="col-sm-10 ">
+				{% block content %}{% endblock %}
+				</div>
+			</div>
+		</div>
+	</body>
+	</html>
+```
+
+<p>The template uses (and includes) JavaScript and CSS from Bootstrap. The base template also references a local css file (styles.css). Create <b>/projname/appname/static/css/styles.css</b> and give it this content:</p>
+
+```css
+	.sidebar-nav {margin-top: 20px; padding: 0; list-style: none;}
+```
+
+<h6>The index template</h6>
+<p>Create the HTML file <b>/projname/appname/templates/index.html</b> and give it the content shown below. As you see, we extend our base template in the first line, then replaces the default content block with a new one for this template. Further edit where needed:</p>
+
+```django
+	{% extends "base_generic.html" %}
+	{% block content %}
+	<h1>PROJNAME Home</h1>
+	<p>Hello <em>World!</em>. This is a very basic Django website developed as a tutorial.</p>
+	
+	<h2>Dynamic content</h2>
+	<p>INSERT WITTY MESSAGE HERE:</p>
+	<ul>
+		<li><strong>Item 1:</strong> {{ gen_count }}</li>
+	</ul>
+
+	{% endblock %}
+```
+
+<p>Django uses the same <code>{{}}</code> (template variables) as AngularJS. This is our dynamic content. This is different from <code>{}</code>, also known as template tags. These tags are enclosed in a single brace with <code>%</code> (percentage) sign.</p>
+	
+<h6>Referencing static files in templates</h6>
+<p>This project is likely to use static resources, including JavaScript, CSS, and images. Django allows you to specify the location of these files in your template relative to the <code>STATIC_URL</code> global setting. The default skeleton website sets the value of <code>STATIC_URL</code> to <b>'/static/'</b>. You may choose to host these on a CDN or elsewhere. Within the template, you first call the load template tag specifying <i>"static"</i> to add this template item. After static is loaded, you can then use the static template tag to specify the relative URL  to the file of interest.</p>
+	
+```django
+	<!-- Add additional CSS in static file -->
+	{% load static %}
+	<link rel = "style" href="{%static 'css/styles.css' %}">
+```
+<p>If desired, add an image into the page in the same fashion:</p>
+
+```django
+	{% load static %}
+	<img src="{% static 'appname/images/name_of_image.whatever' %}" />
+```	
+
+<h6>Side Note::</h6>
+<p>The changes above specify where the files are located, but Django does not serve them by default. While we enabled serving by the webdev in the global URL mapper <b>/projname/appname/urls.py</b>, you will still need to arrange for them to be served in production. We'll look at this later. </p>
+
+<h5>Linking to URLs</h5>
+<p>The base template above introduced the url template tag.</p>
+
+```django
+	<li><a href="{% url 'index' %}">Home</a></li>
+```
+
+<p>This tag takes the name of a <code>url()</code> function called in your <b>urls.py</b> and values for any arguments the associated view will receive from that function. It returns a URL that you can use to link to the resource. What does it look like? At this point, we should have created everything needed to display the index page. </p>
+
+```
+	python3 manage.py runserver
+```
+
+<p>Open your browser to the local host. If everything is set up correctly, you should see the index page.<br>
+This concludes Creating a Home Page</p>
 
 ...
+
 
 
 
