@@ -10,7 +10,7 @@ Table of Contents:
 02. <a href="#models">Models</a>
 03. <a href="#admin">Creating an Admin Site</a>
 04. <a href="#homepage">Creating a Home Page</a>
-05. Creating Generic Views
+05. <a href="#generic">Creating Generic Views</a>
 06. Session Framework
 07. User Authentication and Permissions
 08. Working with Forms
@@ -743,6 +743,219 @@ This concludes Creating an Admin site</p>
 
 <p>Open your browser to the local host. If everything is set up correctly, you should see the index page.<br>
 This concludes Creating a Home Page</p>
+
+</div>
+<div id="generic">
+<h2>Creating Generic Views</h2>
+<p>This lesson extends our <b>projname</b> website, adding list and detail pages for our <code>ModelClassName</code> items. We'll learn about generic class-based views and show how they can reduce written code for common use cases. Finally, we'll go into URL handling in greater detail, showing how to perform basic pattern matching (RegEx). </p>
+
+<h5>Overview</h5>
+<p>The process is similar to creating the index page shown in the previous lesson. Still, we'll need to create URL maps, views, and templates. Detail pages will have additional challenges of extracting information from patterns in the URL and passing it to the view. For these types of pages, we're going to demonstrate a completely different type of view - generic class-based list and detail views. These generic views reduce the amount of view code needed and makes them easier to write or maintain.</p>
+
+<h5>URL Mapping</h5>
+<p>Open <code>/appname/urls.py</code> and copy in the line shown in bold below. Edit where needed. This <code>url()</code> function defines a regular expression (RegEx) to match against the <code>URL(r'^MODELCLASSNAME/$')</code>, a view function that will be called if the URL matches <code>(views.MODELCLASSNAMEListView.as_view())</code> and a name for this particular mapping.</p>
+
+```python
+	urlpatterns = [
+		url(r'^$', views.index, name='index'),
+		url(r'^ModelClassName/$', views.ModelclassnameListView.as_view(), name='foobar'),
+	]
+
+```
+<p>The RegEx here matches against URLs that equal to 'foobar'. In this case, it is the lowercase version of <code>modelclassname/</code>.
+
+- ^ | String start marker
+- $ | String end marker
+
+<p>The view function has a different format than before because this view will actually be implemented as a class. We'll be inheriting from an existing generic view function instead of writing our own from scratch. For Django class-based views, we access an appropriate view function by calling the class method <code>as_view()</code></p>.
+
+<h5>View (class-based)</h5>
+
+<p>ListView is a class that inherits from an existing view. Because the generic view already implements most of the functionality we need, and follows Django best-practice, we will be able to create a more robust list view with less code, less repetition, and ultimately less maintenance. Edit <b>/appname/views.py</b> and add the following to the existing code:</p>
+
+```python
+	from django.views import generic
+	
+	class ModelClassNameListView(generic.ListView):
+		model = ModelClassName
+```
+
+<p>That is it. The generic view will query the db to get all records for the specified model <code>ModelClassName</code>, and then render a template located at <b>/projname/appname/templates/appname/modelclassname_list.html</b> . Within the template, you can access the list of books with the template variable name <b>object_list</b> OR <b>modelclassname_list</b>.<p>
+
+<p>Attributes can be added to change the default behaviour above. You can specify another template file if you need to have multiple views that use this same model. <p>
+	
+<p>You might want to use a different template variable name if <b>modelclassname_list</b> is not intuitive for your particular template use-case. Possibly the most useful variation is to change/filter the subset of results that are returned this way you can list the top X of items that were viewed by other users.</p>
+
+```python
+	class ModelClassNameListView(generic.ListView):
+		model = ModelClassName
+		context_object_name = 'my_modelclassname_list' # your own name for the list as a template variable
+		queryset = ModelClassName.objects.filter(title__icontains='insert random meaningful word here')
+		template_name = 'modelclassname/my_arbitrary_template_name_list.html' # Specify your own template name/location
+```
+
+<h6>Creating the List View template</h6>
+<p> Create an HTML file called <b>/projname/appname/templates/appname/item_list.html</b> and edit the text below.
+	
+```django
+	{% extends "base_generic.html" %}
+	{% block content %}
+	<h1>Modelclassname List
+	{% if modelclassname_list %}
+	<ul>
+	{% for modelclassname in modelclassname_list %}
+		<li><a href="{{ modelclassname.get_absolute_url }}">{{ modelclassname.item1 }}</a> ({{modelclassname.item2}})</li>
+	{% endfor %}
+	</ul>
+
+	{% else %}
+	<p>There are no modelclassname in the appname.</p>
+	{% endif %}
+
+	{% endblock %}
+```
+
+<p>Template for generic views are just like any other templates. For our index template, we extended the base template in the first line, just like how you would do with partials with Angular.</p>
+
+<h6>Conditional execution</h6>
+<p>We use the if, else, and endif template tags to check whether the item_list has been defined and is not empty. If it's empty, then we display a text explaining there are no more items to display.</p>
+
+```django
+	{% if book_list %}
+	<!-- code here to list the items -->
+	{% else %}
+		<p>There are no modelclassname in the appname.</p>
+	{% endif %}
+```
+<p>The condition above only checks for 1 case, but you can test on additional conditions using the elif template - <code>{% elif var2 %}</code> where var2 is variable2.</p>
+
+<h6>For loops</h6>
+<p>We use the for and endfor template tags to loop through the <code>modelclassname</code> list. 
+
+```django
+	{% for book in book_list %}
+		<!-- code here get information from each item -->
+	{% endfor %}
+```
+
+<h6>Accessing variables</h6>
+<p>As discussed before, Django is just like Angular when accessing variables inside the HTML page:</p>
+
+```django
+	<li>
+		<a href="{{ modelclassname.get_absolute_url }}">{{ modelclassname.title }}</a>
+		({{modelclassname.item}})
+	</li>
+```
+
+<h5>Update the base template</h5>
+<p>Edit the base template <b>/projname/appname/templates/base_generic.html</b> and insert <code> {% url 'modelclassname' % }</code> into the URL link for All Modelclassname, as shown below.</p>
+
+```django
+	<li><a href="{% url 'index' %}">Home</a></li>
+	<li><a href="{% url 'foobar' %}">Foobar Menu</a></li>
+```
+
+<p>You won't be able to build the item list because it is still missing a dependency. The URL map for the <code>modelclassname</code> detail pages, which is needed to create hyperlinks to individual items. We'll show both list and detail views after the next section.</p>
+
+<h6>Updating the URL mapping</h6>
+<p>Edit <b>/appname/urls.py</b> and add the <code>modelclassname-detail</code> URL mapper shown below. This <code>url()</code> function defines a pattern, associated generic class-based detail view, and a name.</p>
+
+```python
+	urlpatterns = [
+		url(r'^$', views.index, name='index'),
+		url(r'^modelclassname/$', views.ModelclassnameListView.as_view(), name='modelclassname'),
+		url(r'^modelclassname/(?P<pk>\d+)$', views.ModelclassnameDetailView.as_view(), name='modelclassname-detail'),
+	]
+```
+<p>Unlike the previous mapper, in this case, we're using RegEx to match against a real "pattern" rather than just a string. This RegEx matches against any URL that starts with <code>modelclassname</code>, followed by one or more digits before the end of the line marker. While performing the matching, it "captures" the digits, and passes them to the view function as a parameter named <code>pk</code>.
+
+<h6>Side Note</h6>
+<p><span color="red">Important</span> : The generic class-based detail view expects to be passed as parameter named <code>pk</code>. If
+you're writing your own function view, you can use whatever parameter name you like, or indeed pass the information in an unnamed argument.</p>
+
+<h6>A lightning RegEx primer</h6>
+<p>RegEx are an incredibly powerful pattern mapping tool. RegEx should usually be declared using the raw string literal syntax. They are enclosed as shown:</p>
+
+- r'(your RegEx text goes here)'
+
+<p>Other pattern matches are:</p>
+
+- ^ | Match the beginning of the text
+- $ | Match the end of the text
+- \+ | Match one or more of the preceding characters.
+- \* | Match zero or more of the preceding character.
+- \d | Match a digit (0, 1, 2, ... 9)
+- \w | Match a word character (e.g. - uppoer or lower case in the alphabet, digit or the underscore character '_' )
+- () | Capture the part of the pattern inside the brackets. Any captured values will be passed to the view as unnamed parameters (? P< name>...) - Capture the pattern (indicated by ...) as a named variable (in this case "name"). The captured values are passed to the view with the name specified. Your view must therefore declare an argument with the same name!
+- [] | Match against one character in the set.
+
+
+<h6>Updating the View (class-based)</h6>
+<p>Edit <b>appname/views.py</b> and paste the following under ListView :</p>
+
+```python
+	class ModelClassNameDetailView(generic.DetailView):
+		model = ModelClassName
+```
+
+<p>That is it. All you need to do now is create a template called <b>/projname/appname/templates/appname/modelclassname_detail.html</b> and the view will pass it the db information for the specific item record extracted by the URL mapper. What happens if the record doesn't exist? If a requested record doesn't exist, then the generic class-based detail view will raise an Http404 exception for you automatically.</p>
+
+
+<h5>Creating the Detail View template</h5>
+<p>Edit the HTML file <b>/projname/appname/template/appname/modelclassname_detail.html</b> with the content below.</p>
+
+```django
+	{% extends "base_generic.html" %}
+	{% block content %}
+	<h1>Item0: {{ modelcassname.item0 }}</h1>
+	<p><strong>Item1:</strong> {{ modelclassname.item1 }}</p>
+	<p><strong>Item2:</strong> {{ modelclassname.item2 }}</p>
+	<p><strong>Item3:</strong> 
+	{% for itemX in modelclassname.item3.all %} {{itemX }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+	<div style="margin-left:20px;margin-top:20px">
+		<h4>Random Meaningful Title </h4>
+		{% for varX in modelclassname.modelclassnameinstance_set.all %}
+		<hr>
+		<p class="{% if varX.modelclassnameinstance_item == 'a' %}text-success{% elif varX.modelclassnameinstance_item == 'd' %}text-danger{% else %}text-warning{% endif %}">{{ varX.modelclassnameinstance_item }}</p>
+		
+		{% if varX.modelclassnameinstance_item != 'a' %}<p><strong>Meaningful Text Here:</strong> {{copy.due_back}}<p>{% endif %}
+	{% endfor %}
+	</div>
+	{% endblock %}
+```
+
+<h6>What does it look like?</h6>
+<p>Run the server and open your browser to the local host. Make sure the web page launches and click through what you have configured. To add pagination to the web page, edit <b>appname/views.py</b>:</p>
+
+
+```django 
+	class ModelClassNameListView(generic.ListView):
+		model = ModelClassName
+		paginate_by = X # Where X = a number (e.g. paginate_by = 10)
+```
+
+<p>We'll need to add support to the template to scroll through the paginated web page. Edit <b>/projname/appname/templates/base_generic.html</b> with the following pagination block below our content block.</p>
+
+```django
+	{% block pagination %}
+	{% if is_paginated %}
+	<div class="pagination">
+		<span class="page-links">
+		{% if page_obj.has_previous %}
+			<a href="{{ request.path }}?page={{page_obj.previous_page_number }}">previous</a>
+		{% endif %}
+		<span class="page-current"> Page {{ page_obj.number }} of {{page_obj.paginator.num_pages }}.</span>
+
+		{% if page_obj.has_next %}
+		<a href="{{ request.path }}?page={{page_obj.next_page_number }}">next</a>
+		{% endif %}
+		</span>
+	</div>
+	{% endif %}
+	{% endblock %}
+```
+<p>This concludes Creating Generic Views</p>
 
 ...
 
