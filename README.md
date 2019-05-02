@@ -11,7 +11,7 @@ Table of Contents:
 03. <a href="#admin">Creating an Admin Site</a>
 04. <a href="#homepage">Creating a Home Page</a>
 05. <a href="#generic">Creating Generic Views</a>
-06. Session Framework
+06. <a href="#session">Session Framework</a>
 07. User Authentication and Permissions
 08. Working with Forms
 09. Creating Flatpages
@@ -956,14 +956,59 @@ you're writing your own function view, you can use whatever parameter name you l
 	{% endblock %}
 ```
 <p>This concludes Creating Generic Views</p>
-
-...
-
+</div>
 
 
+<div id="session">
+<h2>Session Framework</h2>
+<p>The HTTP protocol handles all communication between web browsers and servers. It is stateless. This means messages between the client and server are completely independent of each other. There is no such thing of sequence or behavior based on previous messages.</p>
+	
+<p>Sessions are the mechanism used by Django for keeping track of the "state" between the site and a particular browser. Sessions allow you to store arbitrary data per browser and have this data available to the site whenever the browser connects. Individual data items associated with the session are then referenced by a <b>key</b>.</p>
+
+<p>Django uses a cookie containing a special session id to identify each browser and its associated session with the site. The actual session data is stored in the site database by default. Django can be configured to store the session data in other places, but the default location is a good and relatively secure option.</p>
+
+<p>Sessions are enabled automatically at the creation of the <a href="#skeleton">Skeleton Project</a> . The configuration is set up in the <code>INSTALLED_APPS</code> and <code>MIDDLEWARE</code> sections of the project file <b>projname/projname/settings.py</b>.</p>
+
+<p>You can access the session attribute in the view from the request parameter. This session attribute represents the specific connection to the current user. The session attribute is a dictionary-like object that you can read and write as many times as you like in your view. You can do all the normal dictionary operations, including, but not limited to:</p>
+
+- Clearing all data
+- Testing if a key is present
+- Looping through data
+
+<p>Most of the time, you'll just use the standard "dictionary" API to get and set values. The API offers a number of other methods that are mostly used to manage the associated session cookie. For example, there are methods to test that cookies are supported in the client browser, to set and check cookie expiry dates, and to clear expired sessions from the data store. </p>
+
+<a href="https://docs.djangoproject.com/en/2.2/topics/http/sessions/" target="_blank">How to use sessions</a>
+
+<p>Django only saves to the session db and sends the session cookie to the client when the session has been modified or deleted. As a simple real-world example, we'll update our <b>projname</b> to tell the current user how many times they have visited the <b>projname</b> home page. Edit <b>/projname/appname/views.py</b> with the code below:</p>
 
 
+```python
+	def index(request):
+		...
+		gen_count = ModelClassName.objects.all().count() # The 'all()' is implied by default.
+		
+		# Number of visits to this view, as counted in the session variable.
+		num_visits=request.session.get('num_visits', 0)
+		request.session['num_visits'] = num_visits+1
 
+		# Render the HTML template index.html with the data in the context variable
+
+		return render(
+			request,
+			'index.html',			  #num_visits appended
+			context={'gen_count':gen_count, 'num_visits': num_visits}, 
+		)
+
+```
+
+<p>This code gets the value of the <code>num_visits</code> session key, setting the value to 0 if it has not previously been set. Each time a request is received, we then increment the value and store it back in the session. The <code>num_visits</code> variable is passed to the template in our context variable. Edit <b>/projname/appname/templates/index.html</b> to add a visual display on your website.</p>
+
+```django
+	<p>You have visited this page {{ num_visits }}{% if num_visits == 1 %} time{% else %} times{% endif %}.</p>
+```
+
+<p>Save your changes and restart the test server. Everytime the page is refreshed, the number should update.</p>
+This concludes Sessions Framework
 
 
 </div>
