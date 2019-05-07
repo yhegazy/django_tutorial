@@ -12,7 +12,7 @@ Table of Contents:
 04. <a href="#homepage">Creating a Home Page</a>
 05. <a href="#generic">Creating Generic Views</a>
 06. <a href="#session">Session Framework</a>
-07. User Authentication and Permissions
+07. <a href="#auth">User Authentication and Permissions</a>
 08. Working with Forms
 09. Creating Flatpages
 
@@ -915,11 +915,11 @@ you're writing your own function view, you can use whatever parameter name you l
 	{% for itemX in modelclassname.item3.all %} {{itemX }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
 	<div style="margin-left:20px;margin-top:20px">
 		<h4>Random Meaningful Title </h4>
-		{% for varX in modelclassname.modelclassnameinstance_set.all %}
+		{% for foo in modelclassname.modelclassnameinstance_set.all %}
 		<hr>
-		<p class="{% if varX.modelclassnameinstance_item == 'a' %}text-success{% elif varX.modelclassnameinstance_item == 'd' %}text-danger{% else %}text-warning{% endif %}">{{ varX.modelclassnameinstance_item }}</p>
+		<p class="{% if foo.modelclassnameinstance_item == 'a' %}text-success{% elif foo.modelclassnameinstance_item == 'd' %}text-danger{% else %}text-warning{% endif %}">{{ foo.modelclassnameinstance_item }}</p>
 		
-		{% if varX.modelclassnameinstance_item != 'a' %}<p><strong>Meaningful Text Here:</strong> {{copy.due_back}}<p>{% endif %}
+		{% if foo.modelclassnameinstance_item != 'a' %}<p><strong>Meaningful Text Here:</strong> {{copy.due_back}}<p>{% endif %}
 	{% endfor %}
 	</div>
 	{% endblock %}
@@ -1009,6 +1009,358 @@ you're writing your own function view, you can use whatever parameter name you l
 
 <p>Save your changes and restart the test server. Everytime the page is refreshed, the number should update.</p>
 This concludes Sessions Framework
+
+</div>
+
+<div id="auth">
+<h2>User Authentication and Permissions</h2>
+<h5>Overview</h5>
+<p>Django provides an authentication and authorization systems, which is built on top of the session framework discussed in the previous lesson. In this lesson, we're going to learn how to:</p>
+	
+ - Enable user authentication in the projname website
+ - Create your own login and logout pages
+ - Add permissions to your models
+ - Control access to pages
+ 
+ <p>Django's authentication system is flexible. You can build URLs, forms, views and templates from scratch by just calling the provided API to login the user (if you like). Instead, we're going to use the stock authentication views and forms for our credential/account pages. We'll need to create templates as well as show how to create permissions, check on login status and permissions in both views and templates.</p>
+
+<p>Our first user was created when we looked at the <a href="#admin">Creating an admin site</a> lesson. Our superuser is already authenticated and authorized, so  our next step is to create a test user to represent a normal site user. We'll be using the admin site to create our <b>projname</b> groups and logins as this is the quickest way to do so.</p>
+
+<p>Start the <b>webdev</b> and navigate to the admin site at <b>http://127.0.0.1:8000/admin/</b>. From the Authentication and Authorization section, click the Users or Groups links. This will allow you to see their existing records. Next, create a new group for the members. </p>
+
+ 1. Click the Add button (next to Group) to create a new Group ; enter a name for the group.
+ 2. We don't need any permissions for the group, so press SAVE .
+ 
+<p>Lets create a user:</p>
+
+ 1. Navigate back to the home page of the admin site
+ 2. Click the Add button next to Users to open the Add user dialog.
+ 3. Enter an appropriate Username and Password/Password confirmation for your test user.
+ 4. Press SAVE to create the user
+
+<p>The admin site will create the new user and immediately take you to a Change User screen where you can change the username and add information for the User model's optional fields. These fields include the first & last name, email address, the users status and permissions. Click <b>SAVE</b> to go to the list of users.</p>
+
+<h6>Authentication Key Setup</h6>
+<p>Django provides almost everything needed to create authentication pages in order to handle login, logout and password management. This includes an url mapper, views and forms, but not templates. You'll be shown how to integrate the default system into the <b>projname</b> website and create templates.</p>
+
+<h5>Project URLs</h5>
+<p>Edit <b>projname/projname/urls.py</b> and append this to the bottom of the file:</p>
+
+```python
+	#Add Django site authentication urls (for login, logout, password management)
+	urlpatterns += [
+		url(r'^accounts/', include('django.contrib.auth.urls')),
+	]
+```
+<p>Navigate to the <b>http://127.0.0.1:8000/accounts/</b> . Note - This will fail.</p>
+<p>Next, navigate to the login URL <b>http://127.0.0.1:8000/accounts/login/</b>. This will fail again, but with an error that tells you that it's missing the required template (<b>registration/login.html</b>) on the template search path. You'll see the following lines:</p>
+
+```
+	Exception Type: TemplateDoesNotExist
+	Exception Value: registration/login.html
+```
+
+<h5>Template Directory</h5>
+<p>The urls (and implicitly views) that was just added expect to find their associated templates in a directory <b>/registration/</b> somewhere in the templates search path. Your folder structure should look like this:</p>
+
+```
+	projname(django project folder)
+	|_ appname
+	|_ projname
+	|_templates( new )
+		|_ registration
+```
+
+<p>To make these directories visible to the template loader, open the project settings <b>/projname/projname/settings.py</b> and update the <code>TEMPLATES</code> section's <code>'DIRS'</code> line as shown below:</p>
+
+```python
+	TEMPLATES = [
+	{
+		...
+		'DIRS': ['./templates',],
+		'APP_DIRS': True,
+		...
+	}
+```
+
+<h5>Login template</h5>
+<p>Important! : The authentication templates provided are very basic/slightly modified version of the Django demo login templates. You may need to customize them for your own use. Create a new HTML file called <b>/projname/templates/registration/login.html</b> and give it the following contents:</p>
+
+```django
+
+	{% extends "base_generic.html" %}
+	{% block content %}
+	{% if form.errors %}
+		<p>Your username and password didn't match. Please try again.</p>
+	{% endif %}
+
+	{% if next %}
+		{% if user.is_authenticated %}
+			<p>You don't have access to this page. To proceed, please login with an account that has access.</p>
+		{% else %}
+			<p>Please login to see this page. </p>
+		{% endif %}
+	{% endif %}
+	<form method="post" action="{% url 'login' %}">
+	{% csrf_token %}
+		<div>
+			<td>{{ form.username.label_tag }}</td>
+			<td>{{ form.username }}</td>
+		</div>
+		<div>
+			<td>{{ form.password.label_tag }}</td>
+			<td>{{ form.password }}</td>
+		</div>
+		<div>
+			<input type="submit" value="login" />
+			<input type="hidden" name="next" value="{{ next }}" />
+		</div>
+	</form>
+	{# Assumes you setup the password_reset view in your URLconf #}
+	<p><a href="{% url 'password_reset' %}">Lost password?</a></p>
+	{% endblock %}
+```
+
+<p>This template shares some similarities with prior ones we've seen before. It extends our base template and overrides the content block. The rest of the code is a standard form of handling code, which we'll discuss later. All you need to know for now is this will display a form in which you can enter your credentials and will be prompted to enter the correct information if you entered an invalid value.</p>
+
+<p>Navigate back to the login page <b>http://127.0.0.1:8000/accounts/login</b> on the webdev once you've saved your template. You should see a login screen. When you login, you'll be redirected to another page. By default, it is <b>http://127.0.0.1:8000/accounts/profile/</b>.<br>This may fail on you as this page has yet to be defined.</p>
+
+<p>The problem here is by default Django expects that after you login, you will want to be taken to a profile page. To do so, open the project settings <b>/projname/projname/settings.py</b> and add the text below to the bottom. Now, when you login, you should be redirected to the site home page by default. </p>
+
+```python
+	# Redirect to home URL after login (Default redirects to /accounts/profile/)
+	LOGIN_REDIRECT_URL = '/'
+```
+
+<h5>Logout template</h5>
+<p>You'll see some odd behavior when you navigate to the logout url. Your user will be logged out for sure, but you'll be taken to the Admin logout page. This is not what we want. Create and edit <b>/projname/templates/registration/logged_out.html</b>:</p>
+
+
+```django
+	{% extends "base_generic.html" %}
+	{% block content %}
+	<p>Logged out!</p>
+	<a href="{% url 'login'%}">Click here to login again.</a>
+	{% endblock %}
+```
+
+<p>This template is very simple. It displays a message informing the user that he/she have been logged out and provides a link that can go back to the login screen.</p>
+
+<h5>Password reset templates</h5>
+<p>The default password reset system uses email to send the user a reset link. Forms are required to be created to get the user's email address, send the email, allow them to enter a new password, and to note when the whole process is complete. This form used below gets the user's email address. Create <b>/projname/templates/registration/password_reset_form.html</b>, and give it the following contents:</p>
+
+
+```django
+	{% extends "base_generic.html" %}
+	{% block content %}
+	<form action="" method="post">{% csrf_token %}
+		{% if form.email.errors %} {{ form.email.errors }} {% endif %}
+			<p>{{ form.email }}</p>
+		<input type="submit" class="btn btn-default btn-lg" value="Reset password" />
+	</form>
+	{% endblock %}
+```
+
+<p>This form is displayed after the email address has been collected. Create and edit <b>/projname/templates/registration/password_reset_done.html</b> :</p>
+
+```django
+	{% extends "base_generic.html" %}
+	{% block content %}
+	<p>We've emailed you instructions for setting your password. If they haven't arrived in a few minutes, check your spam
+folder.</p>
+	{% endblock %}
+```
+
+<p>This template provides the text of the HTML email containing the reset link that we will send to users. Create and edit <b>/projname/templates/registration/password_reset_email.html</b></p>
+
+
+```django
+	Someone asked for password reset for email {{ email }}. Follow the link below:
+	{{ protocol}}://{{ domain }}{% url 'password_reset_confirm' uidb64=uid token=token %}
+```
+
+<p>This page is where you enter your new password after clicking the link in the password-reset email. Create and edit <b>/projname/templates/registration/password_reset_confirm.html</b>.</p>
+
+```django
+	{% extends "base_generic.html" %}
+	{% block content %}
+	{% if validlink %}
+		<p>Please enter (and confirm) your new password.</p>
+		<form action="" method="post">
+			<div style="display:none">
+				<input type="hidden" value="{{ csrf_token }}" name="csrfmiddlewaretoken">
+			</div>
+			<table>
+				<tr>
+					<td>{{ form.new_password1.errors }}
+					<label for="id_new_password1">New password:</label></td>
+					<td>{{ form.new_password1 }}</td>
+				</tr>
+				<tr>
+					<td>{{ form.new_password2.errors }}
+					<label for="id_new_password2">Confirm password:</label></td>
+					<td>{{ form.new_password2 }}</td>
+				</tr>
+				<tr>
+					<td></td>
+					<td><input type="submit" value="Change my password" /></td>
+				</tr>
+			</table>
+		</form>
+		{% else %}
+		<h1>Password reset failed</h1>
+		<p>Password reset link was invalid because it has already been used. Please request a new password reset.</p>
+	{% endif %}
+	{% endblock %}
+```
+
+<p>This is the last password-reset template, which is displayed to notify you when the password reset has succeeded. Create and edit <b>/projname/templates/registration/password_reset_complete.html</b>:</p>
+
+
+```django
+	{% extends "base_generic.html" %}
+	{% block content %}
+	<h1>The password has been changed!</h1>
+	<p><a href="{% url 'login' %}">log in again?</a></p>
+	{% endblock %}
+```
+
+<h5>Testing the new authentication pages</h5>
+<p>Now that you've added the URL configuration and created all these templates, the authentication pages should work. You can test the new pages by attempting to login and then logout your user account using these URLs:</p>
+
+ - http://127.0.0.1:8000/accounts/login/
+ - http://127.0.0.1:8000/accounts/logout/
+
+<p>Be aware that Django will only send reset emails to addresses to users that are already stored in the database.</p>
+
+<h6>Side Note</h6>
+<p>The password reset system requires that your website supports email, which is beyond the scope of this lesson and so this part won't work yet.</p>
+
+<h5>Testing Against Authenticated Users: Templates</h5>
+<p> Information about users currently logged in templates can be retrieved with the <code>{{ user }}</code> variable. This is typically tested against the <code>{{ user.is_authenticated }}</code> variable to determine whether the user is eligible to see specific content. To demonstrate this, we'll update the sidebar to display a "Login" link if the user is logged out, and a "Logout" link if they are logged in. Edit <b>/projname/appname/templates/base_generic.html</b>:</p>
+
+```django
+	<ul class="sidebar-nav">
+	...
+	{% if user.is_authenticated %}
+		<li>User: {{ user.get_username }}</li>
+		<li><a href="{% url 'logout'%}?next={{request.path}}">Logout</a></li>
+	{% else %}
+		<li><a href="{% url 'login'%}?next={{request.path}}">Login</a></li>
+	{% endif %}
+	</ul>
+```
+
+<p>As you see, we use the <code>if-else-endif</code> tags to conditionally display text based on whether <code>{{user.is_authenticated}}</code> is true. If true, then we know the user is valid and can call <code>{{user.get_username }}</code> to display their name. Note how we have appended <code>?next={{request.path}}</code> to the end of the URLs. This adds a URL parameter next containing the address of the current page, to the end of the linked URL.</p>
+
+<h5>Testing in views</h5>
+<p>If you're using function-based views, the easiest way to restrict access to your functions is to apply the <code>login_required</code> decorator to your view function.</p>
+
+```python
+	from django.contrib.auth.decorators import login_required
+	@login_required
+	def my_view(request):
+		...
+		
+```
+
+<p>If the user is logged in, then the view code will execute as normal. If the user is not logged in, then this will redirect to the login URL defined in the project setting <code>settings.LOGIN_URL</code>. It will pass the current absolute path as the next URL parameter. If the user succeeds in logging in, then they will be returned back to this page - this time authenticated.</p>
+
+<p>The easiest way to restrict access to logged-in users in your class-based views is to use from <code>LoginRequiredMixin</code>. You need to declare this mixin first in the super class list, before the main view class:</p>
+
+```python
+	from django.contrib.auth.mixins import LoginRequiredMixin
+	class MyView(LoginRequiredMixin, View):
+		...
+```
+
+<p>This has the exact same redirect behavior as the <code>login_required</code> decorator. Also, you can specify an alternative location to redirect the user if they are not authenticated <code>login_url</code> and a URL parameter name instead of "next" to insert the current absolute path (redirect_field_name).</p>
+
+```python
+	class MyView(LoginRequiredMixin, View):
+	login_url = '/login/'
+	redirect_field_name = 'redirect_to'
+
+```
+
+<h5>Example - Models</h5>
+<p>This section goes over how to make it possible for users to have a <b>ModelClassNameInstance</b>, but as of now, we don't have any association between this model and a user. We'll create one using a <code>ForeignKey</code> (one-to-many) field. Open <b>appname/models.py</b> and import User model from <code>django.contrib.auth.models</code>:</p>
+
+```python
+	
+	from django.contrib.auth.models import User
+```
+<p>Next, add a variable field to the <b>ModelClassNameInstance</b> model:</p>
+
+```python
+
+	foo = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+```
+
+<p>Now that we've updated our models, we'll need to make a fresh migration. Run: <code>python3 manage.py makemigrations</code>, then, <code>python3 manage.py migrate</code></p>
+
+<h5>Admin</h5>
+<p>Add this new variable <code>foo</code> in <b>appname/admin.py</b> to the <b>ModelClassNameInstanceAdmin</b> class in both the <code>list_display</code> and the <code>fieldsets</code> as shown below. This will make the field visible in the Admin section, so we can assign a User to a <b>ModelClassNameInstance</b> when needed. The <code>list_display</code> is the same as in the <a href="#admin">Creating an Admin Page</a> under Optional - Configure list views. The same with fieldsets.</p>
+
+```python
+	@admin.register(ModelClassNameInstance)
+	class ModelClassNameInstanceAdmin(admin.ModelAdmin):
+		list_display = ('var1', 'var2')
+		list_filter = ('status', 'due_back')
+		fieldsets = (
+			(None, {
+				'fields': ('book','imprint', 'id')
+			}),
+			('Availability', {
+				'fields': ('status', 'due_back','borrower',)
+			}),
+		)
+```
+
+<p><a href="https://developer.mozilla.org/en-US/docs/Learn/Server-side/Django/Authentication">For other views, visit MDN - Authentication</a></p>
+
+<h5>Permissions - Model</h5>
+<p>Permissions define the operations that can be performed on a model instance by a user who has said permission. By default, Django automatically gives the user to add, tweak, change, and delete permissions to all models. This allow users with the permission to perform the associated actions through the admin site.</p>
+<p>You can define your own permissions to models and grant them to specific users as well as changing the permissions associated with different instances of the same model. Testing permissions is similar to testing the authentication status. Defining permissions is done on the model class <code>Meta</code> section, using the permissions field. Any number of permissions can be specified via tuples with each permission being defined in a nested tuple containing the permission's name and permission's display value. For example, we
+might define a permission to allow a user to mark that a book has been returned (<b>appname/models.py</b>).
+
+```
+	class BookInstance(models.Model):
+	...
+
+	class Meta:
+		...
+		permissions = (("can_mark_returned", "Set book as returned"),)
+```
+
+<h5>Permissions - Templates</h5>
+<p>The current user's permissions are stored in a template variable called <code>{{ perms }}</code>. You can check whether the current user has a particular permission using the specific variable name within the Django "app". Typically, we test for the permission using the template <code>{% if %}</code> tag.</p>
+
+<h5>Permissions - Views</h5>
+<p>Permissions can be tested in function view using the <code>permission_required</code> decorator or in a class-based view using the <code>PermissionRequiredMixin</code>. The pattern and behavior are the same as for the login authentication, though you might have to add multiple permissions. Function view decorator:</p>
+
+```python
+	from django.contrib.auth.decorators import permission_required
+	
+	@permission_required('appname.can_mark_returned')
+	@permission_required('appname.can_edit')
+	def my_view(request):
+		...
+```
+<p>Permission-required mixin for class-based views:</p>
+
+```python
+	from django.contrib.auth.mixins import PermissionRequiredMixin
+
+	class MyView(PermissionRequiredMixin, View):
+		permission_required = 'appname.can_mark_returned'
+		# Or multiple permissions
+		permission_required = ('appname.can_mark_returned', 'appname.can_edit')
+
+	# Note that 'appname.can_edit' is just an example; the appname application doesn't have such permission!
+```
+
+<p>This concludes User Authentication and Permissions.</p>
 
 
 </div>
