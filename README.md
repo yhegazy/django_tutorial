@@ -13,7 +13,7 @@ Table of Contents:
 05. <a href="#generic">Creating Generic Views</a>
 06. <a href="#session">Session Framework</a>
 07. <a href="#auth">User Authentication and Permissions</a>
-08. Working with Forms
+08. <a href="#forms">Working with Forms</a>
 09. Creating Flatpages
 
 <br></br><br></br>
@@ -1361,6 +1361,33 @@ might define a permission to allow a user to mark that a book has been returned 
 ```
 
 <p>This concludes User Authentication and Permissions.</p>
-
-
 </div>
+
+<div id="forms">
+<h2>Working with Forms</h2>
+<p>An HTML Form is a group of one or more fields on a web page. It is a means to collect information from users for submission to a server as well as collecting user input. Secondly, they are a relatively secure way of sharing data with the server, as forms allow you to send data in POST requests with cross-site request forgery protection. In this lesson, we'll expand on creating forms. We had a little taste of forms in the Django Admin site.</p>
+
+<h5>Forms</h5>
+<p>The <b>Form</b> class is the heart of Django's form handling system. It specifies the field in the form, layout, display widgets, label, initial values, and (once validated) the error messages associated with invalid fields. It also provides methods for rendering itself in templates using predefined formats or for getting the value of any element. The declaration syntax for a <b>Form</b> is very similar to that for declaring a <b>Model</b> (/projname/appname/forms.py). Here is a code example:</p>
+
+```python
+	from django import forms
+	
+	class FormClassNameForm(forms.Form):
+		foo = forms.DateField(help_text="Enter something meaningful here.")
+```
+
+<p>In this case, we have a single <code>DateField</code> for entering the date that will render in HTML with a blank value. There are many other types of form fields, many are the same like the model fields. The arguments that are common to most fields are listed:</p>
+
+ - required | If True, the field may not be left blank or given a None value. Fields are required by default, so you would set required=False to allow blank values in the form.
+ - label | The label to use when rendering the field in HTML. If label is not specified, then Django would create one from the field name by capitalizing the first letter and replacing underscores with spaces.
+ - label_suffix | By default, a colon is displayed after the label. This argument allows you to specify as different suffix containing other character(s).
+ - initial | The initial value for the field when the form is displayed.
+ - widget | The display widget to use
+ - help_text | Additional text that can be displayed in forms to explain how to use the field
+ - error_messages | A list of error messages for the field. You can override these with your own messages if needed.
+ - validators | A list of functions that will be called on the field when it is validated.
+ - localize | Enables the localization of form data input
+ - disabled | The field is displayed, but its value cannot be edited if this is True. The default is False.
+ 
+ </div>
