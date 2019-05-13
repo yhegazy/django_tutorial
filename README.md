@@ -1390,4 +1390,105 @@ might define a permission to allow a user to mark that a book has been returned 
  - localize | Enables the localization of form data input
  - disabled | The field is displayed, but its value cannot be edited if this is True. The default is False.
  
+<h5>URL Configuration</h5>
+<p>In this section, we'll look at how to add a URL configuration for any page. Edit the following code below in <b>projname/appname/urls.py</b>. </p>
+
+```python
+	urlpatterns += [
+		url(r'^modelclassname/(?P<pk>[-\w]+)/renew/$', 
+		views.FunctionNameInViewsDotpy, name='function-name-in-views-dot-py'),
+	]
+```
+
+
+<h5>ModelForms</h5>
+<p>Creating a Form class using the approach described above is very flexible. It allows you to create whatever sort of form page you like and associate it with any model or models. However, if you need a form to map the fields of a single model, then your model will already define most of the information that you need to your form. Rather than recreating the model definitions in your form, it is easier to use the <b>ModelForm</b> helper class to create the form from your model. This <b>ModelForm</b> can be used within your views in exactly the same way as any ordinary Form.</p>
+
+<p>A basic <b>ModelForm</b> is shown below. All you need to do to create the form is add <code>Class Meta</code> with the associated model(<b>ModelClassNameInstance</b>) and a list of the model fields to include in the form.</p>
+
+
+```python
+	from django.forms import ModelForm
+	from .models import ModelClassNameInstance
+	
+	class FormClassNameForm(ModelForm):
+		class Meta:
+			model = ModelClassNameInstance
+			fields = ['due_back',]
+```
+
+<p>The rest of the information comes from the model field definition. If these aren't quite right, then we can override them in our <code>class Meta</code>, specifying a dictionary containing the field to change and its new value. You can add labels and help_texts.</p>
+
+<h5>Generic editing views</h5>
+<p>In this section, we're going to use generic editing views to create pages to add functionality to create, edit and delete <b>ModelClassName</b> records from our project - effectively providing a basic reimplementation of parts of the Admin site. Open the views file <b>projname/appname/views.py</b> and append the following code block to the bottom:</p>
+
+```python
+
+	from django.views.generic.edit import CreateView, UpdateView, DeleteView
+	from django.urls import reverse_lazy
+	from .models import ModelClassName
+
+	class ModelClassNameCreate(CreateView):
+		model = ModelClassName
+		fields = '__all__'
+		initial={'varX':'value',}
+
+	class ModelClassNameUpdate(UpdateView):
+		model = ModelClassName
+		fields = ['var1','var2','var3','varX']
+
+	class ModelClassNameDelete(DeleteView):
+		model = ModelClassName
+		success_url = reverse_lazy('modelclassname')
+```
+
+<p>To create the views, you need to derive from <code>CreateView</code>, <code>UpdateView</code>, and <code>DeleteView</code> and
+then define the associated model. For the "create" and "update" cases, you need to specify the fields to display in the form. By default these views will redirect on success to a page displaying the newly crated/edited model item. The <b>ModelClassNameDelete</b> class doesn't need to display any of the fields, so these don't need to be specified. You do, however, need to specify the <code>success_url</code> because there is no obvious default value for Django to use.</p>
+
+<h5>Templates</h5>
+<p>The "create" and "update" views use the same template by default, which will be named after your model - <b>modelclassname_form.html</b>. You can change the suffix to something other than <b>_form</b> using the <b>template_name_suffix</b> field in your view (e.g - template_name_suffix = '_other_suffix'). Create the template file <b>projname/appname/templates/appname/modelclassname_form.html</b> and copy the text below:</p>
+
+```django
+	{% extends "base_generic.html" %}
+	{% block content %}
+	<form action="" method="post">
+	{% csrf_token %}
+		<table>
+			{{ form.as_table }}
+		</table>
+	
+		<input type="submit" value="Submit" />
+	</form>
+	{% endblock %}
+```
+
+<p>This is similar to our previous forms and renders the fields using a table. Also, note how we declared the <code>{% csrf_token %}</code> to ensure that our forms are resistant to CSRF attacks . The "delete" view expects to find a template named with the format <b>modelclassname_confirm_delete.html</b> . Create the template file <b>projname/appname/templates/appname/modelclassname_confirm_delete.html</b> and copy the text below:</p>
+
+```django
+	{% extends "base_generic.html" %}
+	{% block content %}
+	<h1>Delete ModelClassName </h1>
+	<p>Are you sure you want to delete the ModelClassName: {{ModelClassName.item }}?</p>
+	<form action="" method="POST">
+	{% csrf_token %}
+		<input type="submit" action="" value="Yes, delete." />
+	</form>
+	{% endblock %}
+```
+
+<h5>URL configurations</h5>
+<p>Open your URL configuration file (<b>projname/appname/urls.py</b>) and add the following configuration:</p>
+
+```python
+	urlpatterns += [
+		url(r'^modelclassname/create/$', views.ModelClassNameCreate.as_view(), name='modelclassname_create'),
+		url(r'^modelclassname/(?P<pk>\d+)/update/$', views.ModelClassNameUpdate.as_view(), name='modelclassname_update'),
+		url(r'^modelclassname/(?P<pk>\d+)/delete/$', views.ModelClassNameDelete.as_view(), name='modelclassname_delete'),
+	]
+```
+
+<p>The create, update and delete pages are now ready to test. First, login to the site with an account that has editing capabilities. Navigate to the <b>modelclassname</b> create page: http://127.0.0.1:8000/appname/modelclassname/create/. Enter the values for the fields and press Submit. It should be taken to a detail view for your new item, with a URL of something like http://127.0.0.1:8000/appname/modelclassname/10 . The same can be done with update and delete by swapping out the words.</p>
+
+<p>This concludes Working with Forms.</p>
+ 
  </div>
