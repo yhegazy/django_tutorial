@@ -14,7 +14,7 @@ Table of Contents:
 06. <a href="#session">Session Framework</a>
 07. <a href="#auth">User Authentication and Permissions</a>
 08. <a href="#forms">Working with Forms</a>
-09. Creating Flatpages
+09. <a href="#flatpages">Creating Flatpages</a>
 
 <br></br><br></br>
 
@@ -1390,17 +1390,6 @@ might define a permission to allow a user to mark that a book has been returned 
  - localize | Enables the localization of form data input
  - disabled | The field is displayed, but its value cannot be edited if this is True. The default is False.
  
-<h5>URL Configuration</h5>
-<p>In this section, we'll look at how to add a URL configuration for any page. Edit the following code below in <b>projname/appname/urls.py</b>. </p>
-
-```python
-	urlpatterns += [
-		url(r'^modelclassname/(?P<pk>[-\w]+)/renew/$', 
-		views.FunctionNameInViewsDotpy, name='function-name-in-views-dot-py'),
-	]
-```
-
-
 <h5>ModelForms</h5>
 <p>Creating a Form class using the approach described above is very flexible. It allows you to create whatever sort of form page you like and associate it with any model or models. However, if you need a form to map the fields of a single model, then your model will already define most of the information that you need to your form. Rather than recreating the model definitions in your form, it is easier to use the <b>ModelForm</b> helper class to create the form from your model. This <b>ModelForm</b> can be used within your views in exactly the same way as any ordinary Form.</p>
 
@@ -1490,5 +1479,42 @@ then define the associated model. For the "create" and "update" cases, you need 
 <p>The create, update and delete pages are now ready to test. First, login to the site with an account that has editing capabilities. Navigate to the <b>modelclassname</b> create page: http://127.0.0.1:8000/appname/modelclassname/create/. Enter the values for the fields and press Submit. It should be taken to a detail view for your new item, with a URL of something like http://127.0.0.1:8000/appname/modelclassname/10 . The same can be done with update and delete by swapping out the words.</p>
 
 <p>This concludes Working with Forms.</p>
- 
- </div>
+
+</div>
+<div id="flatpages">
+<h2>Flatpages</h2>
+<p>Django comes with an optional "flatpages" application. It lets you store simple "flat" HTML content in a db and handles the management for you via Django's admin interface and a Python API. A flatpage is a simple object with a URL, title, and content. Edit <b>/projname/projname/urls.py</b> and amend the following:</p>
+
+```python
+	urlpatterns += [
+		url(r'^pages/', include('django.contrib.flatpages.urls')),
+	]
+
+```
+<p>Next, edit <b>/projname/projname/settings.py</b> and amend the following:</p>
+
+```python
+	INSTALLED_APPS = [
+		#Add Flatpages and sites
+		'django.contrib.sites',
+		'django.contrib.flatpages',
+	]
+```
+<p>Finally, create <b>/projname/appname/template/flatpages/default.html</b>. Add the following:</p>
+
+
+```django
+	{% extends "base_generic.html" %}
+	{% block content %}
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-md-8">
+				<h1>{{ flatpage.title }}</h1>
+				<p>{{ flatpage.content }}</p>
+			</div>
+		</div>
+	</div>
+	{% endblock %}
+```
+<p>Run makemigration and migrate. <br> This concludes Creating Flatpages.</p>
+</div>
