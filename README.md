@@ -82,12 +82,13 @@ Table of Contents:
         'django.contrib.sessions',
         'django.contrib.messages',
         'django.contrib.staticfiles',
-        'appname.apps.AppnameConfig',
+        
+	'appname.apps.AppnameConfig',
     ]
 ```
 
 <h5>Side Note::</h5>
-<p>The 2nd appname after </b>.apps.</b> needs to start with a capital letter.</p>
+<p>I have seen where some people just add it as 'appname' while others have written it as above. Just remember, the 2nd appname after </b>.apps.</b> needs to start with a capital letter.</p>
  <code>
   appname.apps.AppnameConfig
   </code>    
